@@ -1,0 +1,31 @@
+{
+    "name": "lifo/php-daemon",
+    "description": "PHP Multiprocessing Daemon",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jason Morriss",
+            "email": "lifo101@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Lifo\\Daemon\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.4.4",
+        "ext-pcntl": "*",
+        "symfony/event-dispatcher": "^2.8|^3.0",
+        "symfony/process": "^2.8|^3.0"
+    },
+    "suggest": {
+        "symfony/var-dumper": "For better debug dump output",
+        "symfony/options-resolver": "For better plugin options support"
+    },
+    "require-dev": {
+    },
+    "scripts": {
+    }
+}
