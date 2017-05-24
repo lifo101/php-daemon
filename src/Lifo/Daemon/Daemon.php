@@ -108,7 +108,7 @@ abstract class Daemon
      *
      * @var float
      */
-    private $loopInterval = 0;
+    private $loopInterval = 1;
 
     /**
      * Minimum sleep time for the event loop in microseconds.
@@ -487,7 +487,10 @@ abstract class Daemon
      *
      * You should setup any workers your daemon application requires here.
      */
-    abstract protected function initialize();
+    protected function initialize()
+    {
+        // no-op
+    }
 
     /**
      * Main application logic goes here. Called every loop cycle.
