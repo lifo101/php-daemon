@@ -1,7 +1,6 @@
 <?php
 
 use Lifo\Daemon\Daemon;
-use Lifo\Daemon\Task\AbstractTask;
 
 class SimpleTaskDaemon extends Daemon
 {
@@ -25,30 +24,19 @@ class SimpleTaskDaemon extends Daemon
             $num++;
 
             // Start a task. Returns instantly.
-            // In this example the callable below is actually run in a background process.
-            $this->task(function () use ($num) {
-                // note: we have full and safe access to all Daemon methods
-                $this->log("Task %d is running in the background! My PID=%d. I will now sleep for 2 seconds", $num, $this->getPid(), $this->getParentPid());
-                sleep(2);
-                $this->log("Task %d is done and will exit now", $num);
-            });
 
-            // alternate way to run a task. Pass the FQCN of the class to instantiate. See the SimpleTask class below.
-//            $this->task('SimpleTask');
-//            $this->task(new SimpleTask); // or use the class instance directly
+            // Quick way to run a task. Pass the FQCN of the class to instantiate
+            $this->task('SimpleTask');
+            // or use the class instance directly
+//            $this->task(new SimpleTask);
+
+            // Alternate method to create a task.
+            // Here, the callable below is actually run in a background process.
+//            $this->task(function () use ($num) {
+//                $this->log("Task %d is running in the background! My PID=%d. I will now sleep for 2 seconds", $num, $this->getPid(), $this->getParentPid());
+//                sleep(2);
+//                $this->log("Task %d is done and will exit now", $num);
+//            });
         }
-    }
-}
-
-class SimpleTask extends AbstractTask
-{
-    // give us easy access to the daemon logging routines so we don't have to use Daemon::getInstance()->log
-    use \Lifo\Daemon\LogTrait;
-
-    public function run()
-    {
-        $this->log("Task is running in the background! My PID=%d. I will now sleep for 2 seconds", Daemon::getInstance()->getPid());
-        sleep(2);
-        $this->log("Task is done and will exit now");
     }
 }

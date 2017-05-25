@@ -1328,7 +1328,7 @@ abstract class Daemon
      * Plugins can be lazily loaded.
      *
      * @param string|object $class   Class name or instance of plugin. Must implement {@link PluginInterface}
-     * @param string        $alias   Short alias name for plugin; defaults to snake_case of $class
+     * @param string|array  $alias   Short alias name for plugin; defaults to snake_case of $class. If an array, use array as options.
      * @param array         $options Options to pass to the plugin.
      * @param bool          $lazy    If true the plugin is not instantiated until its first used.
      * @return $this
@@ -1336,6 +1336,11 @@ abstract class Daemon
      */
     public function addPlugin($class, $alias = null, $options = [], $lazy = false)
     {
+        if (is_array($alias)) {
+            $options = $alias;
+            $alias = null;
+        }
+
         if (!$alias && !($alias = StringUtil::fqcnToSnake($class, 'plugin'))) {
             throw self::createInvalidArgumentException(func_get_args(), 'Invalid plugin class argument #1. A valid plugin alias must be specified in argument #2');
         }

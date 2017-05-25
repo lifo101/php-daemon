@@ -2,7 +2,6 @@
 
 use Lifo\Daemon\Daemon;
 use Lifo\Daemon\Mediator\Mediator;
-use Lifo\Daemon\Promise;
 
 class SimpleWorkerDaemon extends Daemon
 {
@@ -10,11 +9,16 @@ class SimpleWorkerDaemon extends Daemon
     protected function initialize()
     {
         // passed in the FQCN of the worker class and provided an alias name to be used within the execute loop.
-        $this->addWorker('SimpleWorker', 'worker')
+        // the alias for this worker defaults to the snake_case of the class name with "Worker" stripped off. We provide
+        // it here anyway for example purposes only.
+        $this->addWorker('SimpleWorker', 'example')
             // enable auto-restarts of workers, to show them exit and be re-created on-the-fly
             ->setAutoRestart(true)
+            // how many calls a worker will process before exiting
             ->setMaxCalls(10)
+            // how long a worker will run before exiting
             ->setMaxRuntime(10)
+            // how many workers to fork
             ->setMaxProcesses(2)
             // optional ON_RETURN event for when a worker returns a result. Not needed if you use the Promise result
             // from worker method calls. See the examples below.
@@ -37,16 +41,14 @@ class SimpleWorkerDaemon extends Daemon
         if (mt_rand(1, 3) == 1 || $this->getLoopIterations() % 5 == 0) {
             // get a reference to the worker via its alias that was defined in the initialize() method above.
             /** @var SimpleWorker|Mediator $worker */
-            $worker = $this->worker('worker');
+            $worker = $this->worker('example');
 
             /*
              * Option 1:
              * Call the worker method and act on the returned Promise.
              */
-            /** @var Promise $result */
-            $result = $worker->randomString();
-            $result->then(function ($value) {
-                $this->log("Worker returned $value via Promise");
+            $worker->randomString()->then(function ($value) {
+                $this->log("Worker returned %s via Promise", $value);
             });
 
             /*
@@ -69,16 +71,3 @@ class SimpleWorkerDaemon extends Daemon
     }
 }
 
-class SimpleWorker // optional: implements \Lifo\Daemon\Worker\WorkerInterface
-{
-    // give us easy access to the daemon logging routines so we don't have to use Daemon::getInstance()->log
-    use \Lifo\Daemon\LogTrait;
-
-    // this method will be called from the daemon execute loop and is normally processed within a forked child.
-    public function randomString()
-    {
-        $this->debug(__FUNCTION__ . "() called");
-        usleep(100000 * mt_rand(1, 5)); // fake latency
-        return md5(microtime(true)); // not really a random string; for brevity
-    }
-}

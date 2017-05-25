@@ -6,7 +6,8 @@
 
 declare(ticks = 1); // needed for the daemon signal handling
 
-include __DIR__ . '/autoload.php';
+/** @var \Composer\Autoload\ClassLoader $loader */
+$loader = require __DIR__ . '/autoload.php';
 
 if (empty($argv[1])) {
     listExamples();
@@ -23,6 +24,10 @@ if (!$script) {
 
 // run the example
 echo ">> Running example: \"$name\" (Press ^C to exit)\n";
+if (strpos($script, 'run.php') !== false) {
+    // add the directory of the example we're running to the auto-loader
+    $loader->add('', dirname($script));
+}
 $run = require $script;
 if (is_callable($run)) {
     $run();
@@ -72,6 +77,43 @@ function getScript($name)
     return $script;
 }
 
+/**
+ * Output some header text. The text is word-wrapped and optionally wrapped in a border. To be used before an example
+ * is run.
+ *
+ * @param string $msg     Message to display.
+ * @param bool   $wrapper If true, an upper/lower border is added to the message.
+ */
+function exampleHeader($msg, $wrapper = true)
+{
+    $width = min(getScreenSize(true) ?: 80, 132) - 1;
+    $paragraphs = array_map('trim', preg_split('/(\r?\n\s*){2,}/', $msg));
+
+    echo "\n";
+    if ($wrapper) {
+        echo str_repeat('=', $width), "\n";
+    }
+
+    foreach ($paragraphs as $idx => $text) {
+        if ($idx != 0) {
+            echo "\n";
+        }
+        $text = wordwrap(trim(implode(" ", array_map('trim', explode("\n", $text)))), $width);
+        echo $text, "\n";
+    }
+
+    if ($wrapper) {
+        echo str_repeat('=', $width), "\n";
+    }
+    echo "\n";
+}
+
+/**
+ * Return the console screen size. Returns an array of [width, height], or just width if $widthOnly is true.
+ *
+ * @param bool $widthOnly If true, only the width is returned.
+ * @return array|int|null
+ */
 function getScreenSize($widthOnly = false)
 {
     // non-portable way to get screen size. just for giggles...
@@ -79,9 +121,9 @@ function getScreenSize($widthOnly = false)
     preg_match_all("/rows.([0-9]+);.columns.([0-9]+);/", strtolower(exec('stty -a |grep columns')), $output);
     if (count($output) == 3) {
         if ($widthOnly) {
-            return $output[2][0];
+            return (int) $output[2][0];
         } else {
-            return [$output[1][0], $output[2][0]];
+            return array_map('intval', [$output[2][0], $output[1][0]]);
         }
     }
     return null;

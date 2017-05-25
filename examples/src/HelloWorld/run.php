@@ -5,6 +5,11 @@ $META = [
 ];
 
 return function () {
+    exampleHeader("
+        Simple example that simply logs a 'Hello World' message every loop iteration of the daemon. This is a
+        no-frills example of the minimal code required to start a daemon process.
+    ");
+
     // get the daemon instance and configure it. Below are some common configuration settings
     $daemon = HelloWorldDaemon::getInstance()
         // loop once per second; can be fractional, or even 0 (defaults to 1)

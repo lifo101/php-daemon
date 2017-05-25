@@ -27,7 +27,7 @@ class PluginsDaemon extends Daemon
         ]);
 
         // add our example plugin to the daemon.
-        $this->addPlugin('MyPlugin', 'my_plugin', [
+        $this->addPlugin('MemoryPlugin', [
             'interval' => 5,
         ]);
 
@@ -40,7 +40,7 @@ class PluginsDaemon extends Daemon
     protected function execute()
     {
         // show that the loop is running independently
-        $this->log("Loop %d", $this->getLoopIterations());
+        $this->log("Loop %d (%d trash objects stored)", $this->getLoopIterations(), count($this->trash));
 
         // take up memory on each iteration; so you can see the 'growth' in memory from the MyPlugin output
         for ($i=0; $i<25; $i++) {
@@ -48,54 +48,10 @@ class PluginsDaemon extends Daemon
         }
 
         // Dump the plugin stats once
-        if ($this->getLoopIterations() == 1) {
-            $stats = $this->stats();
-            $this->log("Lock plugin stats: ");
-            $this->dump($stats['plugins']['lock']);
-        }
-    }
-}
-
-/**
- * This simple plugin shows an example of how to create a plugin that can inject itself into the Daemon event cycle.
- *
- * This plugin will dump some stats every X iterations of the daemon loop.
- */
-class MyPlugin extends AbstractPlugin
-{
-    use LogTrait;
-
-    protected function getDefaults()
-    {
-        return [
-            // how often to dump stats
-            'interval' => 3
-        ];
-    }
-
-    public function setup($options = [])
-    {
-        static $last = 0;
-        // not the proper place to put this, but it'll do for this example
-        $initialMemory = memory_get_usage();
-
-        parent::setup($options);
-
-        $daemon = PluginsDaemon::getInstance();
-
-        // setup callback for IDLE events
-        $daemon->on(DaemonEvent::ON_IDLE, function () use ($daemon, $initialMemory, &$last) {
-            if (!$last || time() - $last >= 5) {
-                $last = time();
-
-                $suffix = ['b', 'k', 'm', 'g', 't'];
-                $this->debug(3, "Runtime: %s | Memory: Usage=%s, Peak=%s, Growth=%s",
-                    StringUtil::elapsedFromSeconds($daemon->getRuntime()) ?: '0s',
-                    StringUtil::kbytes(memory_get_usage(), 2, $suffix),
-                    StringUtil::kbytes(memory_get_peak_usage(), 2, $suffix),
-                    StringUtil::kbytes(memory_get_usage() - $initialMemory, 2, $suffix)
-                );
-            }
-        });
+//        if ($this->getLoopIterations() == 1) {
+//            $stats = $this->stats();
+//            $this->log("Lock plugin stats: ");
+//            $this->dump($stats['plugins']['lock']);
+//        }
     }
 }
