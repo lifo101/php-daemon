@@ -1,10 +1,6 @@
 <?php
 
 use Lifo\Daemon\Daemon;
-use Lifo\Daemon\Event\DaemonEvent;
-use Lifo\Daemon\LogTrait;
-use Lifo\Daemon\Plugin\AbstractPlugin;
-use Lifo\Daemon\StringUtil;
 
 class PluginsDaemon extends Daemon
 {
@@ -43,7 +39,7 @@ class PluginsDaemon extends Daemon
         $this->log("Loop %d (%d trash objects stored)", $this->getLoopIterations(), count($this->trash));
 
         // take up memory on each iteration; so you can see the 'growth' in memory from the MyPlugin output
-        for ($i=0; $i<25; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             $this->trash[] = new DateTime();
         }
 

@@ -1,4 +1,5 @@
 <?php
+use Lifo\Daemon\Daemon;
 use Lifo\Daemon\Event\DaemonEvent;
 use Lifo\Daemon\LogTrait;
 use Lifo\Daemon\Plugin\AbstractPlugin;
@@ -29,11 +30,11 @@ class MemoryPlugin extends AbstractPlugin
 
         parent::setup($options);
 
-        $daemon = PluginsDaemon::getInstance();
+        $daemon = Daemon::getInstance();
 
         // setup callback for IDLE events
-        $daemon->on(DaemonEvent::ON_IDLE, function () use ($daemon, $initialMemory, &$last) {
-            if (!$last || time() - $last >= 5) {
+        $daemon->on(DaemonEvent::ON_IDLE, function () use ($daemon, $initialMemory, $options, &$last) {
+            if (!$last || time() - $last >= $options['interval']) {
                 $last = time();
 
                 $suffix = ['b', 'k', 'm', 'g', 't'];
