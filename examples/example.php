@@ -6,8 +6,13 @@
 
 declare(ticks = 1); // needed for the daemon signal handling
 
+if (!file_exists(__DIR__ . '/../../../autoload.php')) {
+    exampleHeader("Error: You must initialize your composer in the root of your application before running any examples: composer install", false);
+    exit(1);
+}
+
 /** @var \Composer\Autoload\ClassLoader $loader */
-$loader = require __DIR__ . '/autoload.php';
+$loader = require __DIR__ . '/../../../autoload.php';
 
 if (empty($argv[1])) {
     listExamples();
@@ -24,10 +29,8 @@ if (!$script) {
 
 // run the example
 echo ">> Running example: \"$name\" (Press ^C to exit)\n";
-if (strpos($script, 'run.php') !== false) {
-    // add the directory of the example we're running to the auto-loader
-    $loader->add('', dirname($script));
-}
+// add the directory of the example we're running to the auto-loader
+$loader->add('', dirname($script));
 $run = require $script;
 if (is_callable($run)) {
     $run();
@@ -41,7 +44,7 @@ function listExamples()
         foreach ($files as $file) {
             $info = pathinfo($file);
             unset($META);
-            include getScript($info['filename']);
+            require getScript($info['filename']);
             $names[$info['filename']] = isset($META) ? $META : '';
         }
         ksort($names);
@@ -89,8 +92,8 @@ function exampleHeader($msg, $wrapper = true)
     $width = min(getScreenSize(true) ?: 80, 132) - 1;
     $paragraphs = array_map('trim', preg_split('/(\r?\n\s*){2,}/', $msg));
 
-    echo "\n";
     if ($wrapper) {
+        echo "\n";
         echo str_repeat('=', $width), "\n";
     }
 
@@ -104,8 +107,8 @@ function exampleHeader($msg, $wrapper = true)
 
     if ($wrapper) {
         echo str_repeat('=', $width), "\n";
+        echo "\n";
     }
-    echo "\n";
 }
 
 /**
@@ -121,7 +124,7 @@ function getScreenSize($widthOnly = false)
     preg_match_all("/rows.([0-9]+);.columns.([0-9]+);/", strtolower(exec('stty -a |grep columns')), $output);
     if (count($output) == 3) {
         if ($widthOnly) {
-            return (int) $output[2][0];
+            return (int)$output[2][0];
         } else {
             return array_map('intval', [$output[2][0], $output[1][0]]);
         }

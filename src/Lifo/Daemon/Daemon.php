@@ -263,6 +263,14 @@ abstract class Daemon
     private $shutdownOnInterrupt = true;
 
     /**
+     * If true, the Daemon will intercept SIGUSR1 signals and dump all stats to the log file, will also echo to the
+     * console if {@link Daemon::isVerbose} is true.
+     *
+     * @var bool
+     */
+    private $dumpOnSignal = true;
+
+    /**
      * The initial size of the currently opened log file
      *
      * @var integer
@@ -344,6 +352,27 @@ abstract class Daemon
         $this->event = new DaemonEvent($this);
         $this->pid = getmypid(); // don't want to call event handler with setPid()
         $this->parentPid = $this->pid;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDumpOnSignal()
+    {
+        return $this->dumpOnSignal;
+    }
+
+    /**
+     * If true, the Daemon will intercept the SIGUSR1 event and dump all stats to the log. Will echo to the console (if
+     * isVerbose is true).
+     *
+     * @param bool $dumpOnSignal
+     * @return $this
+     */
+    public function setDumpOnSignal($dumpOnSignal)
+    {
+        $this->dumpOnSignal = (bool)$dumpOnSignal;
+        return $this;
     }
 
     private function __clone()
@@ -1966,7 +1995,7 @@ abstract class Daemon
 
         switch ($signal) {
             case SIGUSR1:
-                if ($this->parent) {
+                if ($this->parent && $this->dumpOnSignal) {
                     $this->dump();
                 }
                 break;
