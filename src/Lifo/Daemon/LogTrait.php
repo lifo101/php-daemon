@@ -37,7 +37,7 @@ trait LogTrait
     }
 
     /**
-     * Write a message to the log. Will also output to STDERR if {@link verbose} is true.
+     * Write a message to the log. Will also output to STDERR if {@link Daemon::$verbose} is true.
      *
      * The sub-class may override this to provide its own functionality or plugins may intercept this behavior by
      * listening on the {@link DaemonEvent::ON_LOG} event. If propagation of the event is stopped then the log message
@@ -64,8 +64,8 @@ trait LogTrait
     }
 
     /**
-     * Output a debug message if {@link $debug} is true and optionally if {@link $debugLevel} is higher than
-     * the specified $level.
+     * Output a debug message if {@link Daemon::$debug} is true and optionally if {@link Daemon::$debugLevel} is
+     * higher than the specified $level.
      *
      * @param int|string $level   Optional debug level (int) or message (string)
      * @param string     $msg     Message string if $level is not specified
