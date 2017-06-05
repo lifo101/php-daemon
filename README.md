@@ -21,7 +21,7 @@ user-land code to keep things stable.
 - PHP [POSIX](http://php.net/posix) and [PCNTL](http://php.net/pcntl) Extensions
 
 ### Examples
-See the [Examples Directory](examples/README.md) for examples you can run. 
+See the [examples](examples) directory for examples you can run. 
 
 ### Features
 - The `Event Loop` is maintained by the core `Daemon` class. All you have to do is implement one method `execute` that
@@ -42,7 +42,7 @@ See the [Examples Directory](examples/README.md) for examples you can run.
     Workers use a [Mediator design pattern](https://en.wikipedia.org/wiki/Mediator_pattern) and use Shared Memory
     for it's messaging queue and data. _I might work on a second IPC class that uses sockets instead of SHM to provide
     an alternate choice_.
-- Event Handling. The core `Daemon` has several events (see: [DaemonEvents](src/Lifo/Daemon/Event/DaemonEvent.php))
+- Event Handling. The core `Daemon` has several events (see: [DaemonEvent](src/Lifo/Daemon/Event/DaemonEvent.php))
   that you can easily interface with by registering a callback. Some events have the means to change the behavior of 
   the daemon.
 - Easy Signal Handling via the Event Dispatcher. To catch a signal you simply have to register a `ON_SIGNAL` callback 
