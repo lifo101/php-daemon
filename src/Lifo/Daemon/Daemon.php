@@ -1541,9 +1541,10 @@ abstract class Daemon
      * * A class name string: 'Lifo\Daemon\Task\SimpleTask' // will be instantiated after the process is forked
      *
      * @param \Closure|callable|TaskInterface|string $task
+     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to the task
      * @return Process A simple object representing the state of the process
      */
-    public function task($task)
+    public function task($task, $varargs = null)
     {
         if ($this->shutdown || !$this->parent) {
             $t = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
@@ -1561,27 +1562,36 @@ abstract class Daemon
         }
 
         $group = null;
+        $args = array_slice(func_get_args(), 1);
         if ($task instanceof TaskInterface) {
             $group = $task->getGroup();
-            $callback = function () use ($task) {
+            $callback = function () use ($task, $args) {
                 $task->setup();
-                $task->run();
+                call_user_func_array([$task, 'run'], $args);
+//                $task->run();
                 $task->teardown();
             };
-        } elseif (is_string($task) && class_exists($task)) {
+        } elseif (is_string($task)) {
+            if (!class_exists($task)) {
+                throw new \Exception('Invalid task: Class "' . $task . '" does not exist');
+            }
+
             // Treat $task as a class name. Instantiate the class inside the callback
-            $callback = function () use ($task) {
+            $callback = function () use ($task, $args) {
                 $obj = new $task();
                 if ($obj instanceof TaskInterface) {
                     $obj->setup();
-                    $obj->run();
+                    call_user_func_array([$obj, 'run'], $args);
+//                    $obj->run();
                     $obj->teardown();
                 } else {
                     throw new \Exception('Invalid task: Must implement Lifo\Daemon\Task\TaskInterface');
                 }
             };
         } else {
-            $callback = $task;
+            $callback = function() use ($task, $args) {
+                call_user_func_array($task, $args);
+            };
         }
 
         if (!$group) {
