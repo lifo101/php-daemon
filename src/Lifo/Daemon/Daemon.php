@@ -1541,8 +1541,9 @@ abstract class Daemon
      * * A class name string: 'Lifo\Daemon\Task\SimpleTask' // will be instantiated after the process is forked
      *
      * @param \Closure|callable|TaskInterface|string $task
-     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to the task
+     * @param mixed                                  $varargs Extra arguments (arg1, arg2, etc) to pass to the task
      * @return Process A simple object representing the state of the process
+     * @throws \Exception
      */
     public function task($task, $varargs = null)
     {
@@ -1568,7 +1569,6 @@ abstract class Daemon
             $callback = function () use ($task, $args) {
                 $task->setup();
                 call_user_func_array([$task, 'run'], $args);
-//                $task->run();
                 $task->teardown();
             };
         } elseif (is_string($task)) {
@@ -1582,7 +1582,6 @@ abstract class Daemon
                 if ($obj instanceof TaskInterface) {
                     $obj->setup();
                     call_user_func_array([$obj, 'run'], $args);
-//                    $obj->run();
                     $obj->teardown();
                 } else {
                     throw new \Exception('Invalid task: Must implement Lifo\Daemon\Task\TaskInterface');
