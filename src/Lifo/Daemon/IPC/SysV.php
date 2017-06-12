@@ -7,6 +7,7 @@ use Lifo\Daemon\Daemon;
 use Lifo\Daemon\Exception\CleanErrorException;
 use Lifo\Daemon\Mediator\Call;
 use Lifo\Daemon\Mediator\Mediator;
+use Lifo\Daemon\StringUtil;
 
 class SysV implements IPCInterface
 {
@@ -32,7 +33,7 @@ class SysV implements IPCInterface
 
     public function __construct($size = null)
     {
-        $this->size = $size ?: 5 * 1024 * 1024;
+        $this->malloc($size ?: 5 * 1024 * 1024);
     }
 
     public function setup()
@@ -238,19 +239,6 @@ class SysV implements IPCInterface
                     return $call;
                 };
                 break;
-//            default:
-//                $decoder = function ($msg) use ($type) {
-//                    $call = $this->mediator->getCall($msg['id']);
-//                    // todo determine if this needed
-//                    if (!$call) {
-////                        $call = Call::create($msg['id']);
-////                        $call->setPid($msg['pid']);
-//                        $this->error("GET MSG=%s references unknown Call=%d. Ignoring.", $type, $msg['id']);
-//                    } else {
-//                        $call->setStatus($msg['status']);
-//                    }
-//                    return $call;
-//                };
         }
 
         $tries = 1;
@@ -345,15 +333,28 @@ class SysV implements IPCInterface
         }
     }
 
+    /**
+     * Set the size of the IPC message buffer. If an attempt it made to change the size after the IPC has been setup
+     * (ie: after a worker is started) an error is logged.
+     *
+     * @param $size
+     * @return mixed
+     */
     public function malloc($size)
     {
+        if ($this->shm) {
+            Daemon::getInstance()->error("SHM Memory size cannot be changed after setup. [Current=%s] [New=%s]",
+                StringUtil::kbytes($this->size),
+                StringUtil::kbytes($size)
+            );
+            return $this;
+        }
         $this->size = $size;
         return $this;
     }
 
     /**
      * Return status of the message queue
-     * todo: this should be more portable for different types of messaging pools.
      *
      * @return array
      */
@@ -467,7 +468,7 @@ class SysV implements IPCInterface
                     $this->setupIPC();
                 }
 
-                $this->log("IPC DIAG: Re-Connect failed");
+                $this->error("IPC DIAG: Re-Connect failed");
 
                 // todo recreate shared memory call buffer?
 

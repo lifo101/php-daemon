@@ -5,7 +5,8 @@ namespace Lifo\Daemon\Mediator;
 use Lifo\Daemon\Promise;
 
 /**
- * Represents a method call to a mediated worker process.
+ * Represents a method call to a mediated worker process. A call is serialized into a message buffer and passed back
+ * and forth between a parent and child process.
  */
 class Call implements \Serializable
 {
@@ -27,6 +28,8 @@ class Call implements \Serializable
     public static $NEXT_ID = 2; // must be > SysV::HEADER_ADDRESS
 
     /**
+     * Unique ID for the call.
+     *
      * @var int
      */
     private $id;
@@ -46,7 +49,7 @@ class Call implements \Serializable
     private $method;
 
     /**
-     * Arguments for method
+     * Arguments for the method call
      *
      * @var array
      */
@@ -60,7 +63,7 @@ class Call implements \Serializable
     private $gc = false;
 
     /**
-     * The result from the background process
+     * The result from the background process. To be returned to the parent.
      *
      * @var mixed
      */
@@ -88,7 +91,7 @@ class Call implements \Serializable
     private $size = 1024;
 
     /**
-     * Current status of the call
+     * Current status of the call. See the {@link Call} constants for more information.
      *
      * @var int
      */
@@ -102,6 +105,8 @@ class Call implements \Serializable
     private $time = [];
 
     /**
+     * The returned promise when a call is completed.
+     *
      * @var Promise
      */
     private $promise;
@@ -213,7 +218,6 @@ class Call implements \Serializable
             'status' => $this->status,
             'time'   => isset($this->time[$this->status]) ? $this->time[$this->status] : 0,
             'pid'    => getmypid(),
-//            'pid'    => $this->pid,
         ];
     }
 
@@ -429,6 +433,8 @@ class Call implements \Serializable
     }
 
     /**
+     * Return the unique ID of the call
+     *
      * @return int
      */
     public function getId()
@@ -548,6 +554,8 @@ class Call implements \Serializable
     }
 
     /**
+     * Set the Promise for the call.
+     *
      * @param Promise $promise
      */
     public function setPromise(Promise $promise = null)

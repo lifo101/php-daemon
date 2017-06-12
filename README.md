@@ -3,8 +3,8 @@
 ### Synopsis
 Create robust and stable PHP multiprocess daemons with minimal boilerplate code. The core Daemon class handles the main
 loop and events. The main loop can run at any frequency desired _(within the limits of PHP)_. 
-Using `Tasks` and `Workers` the daemon can call methods on background processes seamlessly w/o worrying about 
-managing forked children.
+Using [Tasks](../../wiki/Tasks) and [Workers](../../wiki/Workers) the daemon can call methods on background processes 
+seamlessly w/o worrying about managing forked children.
 
 ### Why write a daemon in PHP?
 Obviously, writing robust, stable and long-running daemons in PHP is generally not a good idea. It's at least very
@@ -24,25 +24,28 @@ user-land code to keep things stable.
 See the [examples](examples) directory for examples you can run. 
 
 ### Features
-- The `Event Loop` is maintained by the core `Daemon` class. All you have to do is implement one method `execute` that
-  will get called every loop cycle. The loop frequency can be any fractional value in seconds. If set to 0, your 
-  `execute` method will get called as fast as possible (_not normally recommended, unless your loop is doing some sort
-  of blocking call, ie: listening on a socket, etc_).
+- The `Event Loop` is maintained by the core [Daemon](../../wiki/Daemon) class. All you have to do is implement one 
+  method `execute` that will get called every loop cycle. The loop frequency can be any fractional value in seconds. 
+  If set to 0, your `execute` method will get called as fast as possible (_not normally recommended, unless your loop 
+  is doing some sort of blocking call, ie: listening on a socket, etc_).
 - In just a few lines of code you can have parallel processes running in the background without having to manage those
   background processes. 
-  - A `Task` allows you to call any method or callback in a background process. No communication is made between the
-    background process and the parent. Tasks are meant for simple things, for example: Sending an email.
-  - A `Worker` allows you to call any method on an object, or even just a simple callback like a `Task`. Workers
-    can return a value back to the parent via a simple `return` statement in your worker method(s). Workers
-    are maintained automatically and can have multiple children running at the same time, which is handled 
-    transparently. Even if a worker dies or is killed by the OS the Daemon API will still return a result (or exception)
-    to your code. The return value of a Worker is usually a `Promise` object. You can use the standard Promise methods
-    like `then` or `otherwise` to act on the return value. Or you can register an "ON_RETURN" callback on the Worker.
+  - A [Task](../../wiki/Tasks) allows you to call any method or callback in a background process. No communication is 
+    made between the background process and the parent. 
+    Tasks are meant for simple things, for example: Sending an email.
+  - A [Worker](../../wiki/Workers) allows you to call any method on an object, or even just a simple callback like a 
+    [Task](../../wiki/Tasks). Workers can return a value back to the parent via a simple `return` statement in your 
+    worker method(s). Workers are maintained automatically and can have multiple children running at the same time, 
+    which is handled transparently. Even if a worker dies or is killed by the OS the Daemon API will still return a 
+    result (or exception) to your code. The return value of a Worker is usually a `Promise` object. You can use the 
+    standard Promise methods like `then` or `otherwise` to act on the return value. Or you can register an `ON_RETURN` 
+    callback on the Worker.
     
     Workers use a [Mediator design pattern](https://en.wikipedia.org/wiki/Mediator_pattern) and use Shared Memory
-    for it's messaging queue and data. _I might work on a second IPC class that uses sockets instead of SHM to provide
+    for it's messaging queue and data. Different IPC classes can be created to provide alternate communication methods
+    between the parent and children. _I might work on a second IPC class that uses sockets instead of SHM to provide
     an alternate choice_.
-- Event Handling. The core `Daemon` has several events (see: [DaemonEvent](src/Lifo/Daemon/Event/DaemonEvent.php))
+- Event Handling. The core `Daemon` has several events (see: [Events](../../wiki/Events))
   that you can easily interface with by registering a callback. Some events have the means to change the behavior of 
   the daemon.
 - Easy Signal Handling via the Event Dispatcher. To catch a signal you simply have to register a `ON_SIGNAL` callback 
@@ -56,9 +59,9 @@ See the [examples](examples) directory for examples you can run.
   or if a fatal error occurred. 
 - Built in logging. The `Daemon` has 3 basic logging methods: `log`, `error`, `debug`. All of these will write to the
   log file (if configured). If the log file is rotated, overwritten or deleted, the daemon will automatically detect 
-  this and will continue to write to the new log file. The `DaemonEvent::ON_LOG` allows you to register a callback to 
-  change the behavior too. User code can use the [LogTrait](src/Lifo/Daemon/LogTrait.php) to easily add native daemon 
-  logging to their code.
+  this and will continue to write to the new log file. The [DaemonEvent::ON_LOG](../../wiki/Events#on_log) event allows 
+  you to register a callback to change the behavior too. User code can use the [LogTrait](../../wiki/Logging) to easily 
+  add native daemon logging to their code.
 
 ### Credit
 The basis for this library was inspired by the [PHP-Daemon](https://github.com/shaneharter/PHP-Daemon) library

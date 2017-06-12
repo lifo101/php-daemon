@@ -7,7 +7,6 @@ use Lifo\Daemon\Daemon;
 use Lifo\Daemon\Event\DaemonEvent;
 use Lifo\Daemon\Event\GuidEvent;
 use Lifo\Daemon\Event\ReapedEvent;
-use Lifo\Daemon\Event\SignalEvent;
 use Lifo\Daemon\Event\StatsEvent;
 use Lifo\Daemon\ExceptionsTrait;
 use Lifo\Daemon\IPC\IPCInterface;
@@ -272,13 +271,12 @@ class Mediator implements TaskInterface
         $this->determineForkingStrategy();
     }
 
-    public function __destruct()
-    {
-        if (!Daemon::getInstance()->isParent()) {
-            return;
-        }
-        // todo cleanup mediator
-    }
+//    public function __destruct()
+//    {
+//        if (!Daemon::getInstance()->isParent()) {
+//            return;
+//        }
+//    }
 
     /**
      * Intercept calls on the subject.
@@ -398,12 +396,6 @@ class Mediator implements TaskInterface
             }
         });
 
-        $daemon->on(DaemonEvent::ON_SIGNAL, function (SignalEvent $e) {
-            if (!Daemon::getInstance()->isParent() && $e->getSignal() == SIGUSR1) {
-                $this->dump();
-            }
-        });
-
         $daemon->on(DaemonEvent::ON_STATS, function (StatsEvent $e) {
             $stats = $this->onStats($e->getStats());
             if ($stats) {
@@ -425,13 +417,6 @@ class Mediator implements TaskInterface
         if ($this->subject instanceof WorkerInterface) {
             $this->subject->initialize();
         }
-    }
-
-    protected function dump()
-    {
-        $stats = $this->onStats();
-        // todo implement properly
-        function_exists('dump') ? dump($stats) : var_dump($stats);
     }
 
     protected function onStats(array $stats = null)
@@ -533,23 +518,13 @@ class Mediator implements TaskInterface
         return $this->guid;
     }
 
-//    protected function error($msg, $varargs = null)
-//    {
-//        if (Daemon::getInstance()->isParent()) {
-//            Daemon::getInstance()->error($msg);
-//        } else {
-//            $msg = vsprintf($msg, array_slice(func_get_args(), 1));
-//            Daemon::getInstance()->error("%s [%s] Error: %s", StringUtil::baseClassName($this), $this->alias, $msg);
-//        }
-//    }
-
     protected function fatalError($msg, $varargs = null)
     {
         $msg = vsprintf($msg, array_slice(func_get_args(), 1));
         Daemon::getInstance()->fatalError("\"%s\": %s", $this->alias, $msg);
     }
 
-    public function retry($call)
+    protected function retry($call)
     {
         // todo retry
     }
@@ -773,6 +748,18 @@ class Mediator implements TaskInterface
     }
 
     /**
+     * Set the IPC memory buffer size.
+     *
+     * @param int $size Memory size of IPC buffer
+     * @return $this
+     */
+    public function malloc($size)
+    {
+        $this->ipc->malloc($size);
+        return $this;
+    }
+
+    /**
      * Set the maximum number of worker processes
      *
      * @param int $max
@@ -963,7 +950,7 @@ class Mediator implements TaskInterface
     /**
      * Remove the cached call from local storage
      *
-     * @param Call|int $id
+     * @param Call|int $id Call or Call ID to remove from processing.
      */
     private function removeCall($id)
     {
@@ -971,8 +958,7 @@ class Mediator implements TaskInterface
             $id = $id->getId();
         }
 
-        // todo not sure this is useful for anyone, anywhere, anytime, or on any planet
-        // track for stats
+        // track for stats; probably not really useful for anyone...
         if (isset($this->calls[$id])) {
             $call = $this->calls[$id];
             $times = $call->getTime();
@@ -1001,7 +987,9 @@ class Mediator implements TaskInterface
             foreach ($this->reaped as $pid) {
                 // if there was a call for this process then keep our promise and reject it
                 if (null !== $call = $this->findOriginalCall($pid)) {
-                    $this->debug("Premature worker death was reaped [PID=%d] [Call=%d] [Status=%s]", $pid, $call->getId(), Call::getStatusText($call));
+                    $this->debug("Premature worker death was reaped [PID=%d] [Call=%d] [Status=%s]",
+                        $pid, $call->getId(), Call::getStatusText($call)
+                    );
                     $call->timeout()->setResult(new CallDiedException($call));
                     $this->doPromise($call, 'died');
                     $this->removeCall($call);

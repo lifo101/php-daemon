@@ -1526,7 +1526,7 @@ abstract class Daemon
         }
 
         // instantiate the mediator for this worker
-        $mediator = new Mediator($worker, $alias);
+        $mediator = new Mediator($worker, $alias, $ipc);
         $this->workers[$alias] = $mediator;
         return $mediator;
     }
