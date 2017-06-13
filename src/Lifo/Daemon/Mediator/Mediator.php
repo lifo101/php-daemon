@@ -352,7 +352,7 @@ class Mediator implements TaskInterface
         }
     }
 
-    public function parentSetup()
+    protected function parentSetup()
     {
         try {
             $file = null;
@@ -406,7 +406,7 @@ class Mediator implements TaskInterface
         $this->fork();
     }
 
-    public function forkedSetup()
+    protected function forkedSetup()
     {
         $this->callCount = 0;
         $this->calls = [];
