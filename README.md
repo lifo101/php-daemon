@@ -1,10 +1,13 @@
 ## PHP Daemon Library
 
 ### Synopsis
-Create robust and stable PHP multiprocess daemons with minimal boilerplate code. The core Daemon class handles the main
-loop and events. The main loop can run at any frequency desired _(within the limits of PHP)_. 
+Create robust and stable PHP multiprocess daemons without the boilerplate code. The core [Daemon](../../wiki/Daemon) 
+class handles the main loop and events and can run at any frequency desired _(within the limits of PHP)_. You only have
+to implement a single method `execute` to run a daemon process, optionally in the background.
+
 Using [Tasks](../../wiki/Tasks) and [Workers](../../wiki/Workers) the daemon can call methods on background processes 
-seamlessly w/o worrying about managing forked children.
+seamlessly w/o worrying about managing forked children. [Plugins](../../wiki/Plugins) allow you to easily create 
+reusable and shareable code for your Daemons. See the [Features](#features) section below for more information.
 
 ### Why write a daemon in PHP?
 Obviously, writing robust, stable and long-running daemons in PHP is generally not a good idea. It's at least very
@@ -20,16 +23,18 @@ user-land code to keep things stable.
 - A POSIX compatible operating system (Linux, OSX, BSD)
 - PHP [POSIX](http://php.net/posix) and [PCNTL](http://php.net/pcntl) Extensions
 
+### Documentation
+See the [Wiki](../../wiki) for documentation.
+
 ### Examples
 See the [examples](examples) directory for examples you can run. 
 
 ### Features
-- The `Event Loop` is maintained by the core [Daemon](../../wiki/Daemon) class. All you have to do is implement one 
+- The `Main Loop` is maintained by the core [Daemon](../../wiki/Daemon) class. All you have to do is implement one 
   method `execute` that will get called every loop cycle. The loop frequency can be any fractional value in seconds. 
   If set to 0, your `execute` method will get called as fast as possible (_not normally recommended, unless your loop 
   is doing some sort of blocking call, ie: listening on a socket, etc_).
-- In just a few lines of code you can have parallel processes running in the background without having to manage those
-  background processes. 
+- In just a few lines of code you can have parallel processes running in the background. 
   - A [Task](../../wiki/Tasks) allows you to call any method or callback in a background process. No communication is 
     made between the background process and the parent. 
     Tasks are meant for simple things, for example: Sending an email.
@@ -65,13 +70,13 @@ See the [examples](examples) directory for examples you can run.
 
 ### Credit
 The basis for this library was inspired by the [PHP-Daemon](https://github.com/shaneharter/PHP-Daemon) library
-from [Shane Harter](https://github.com/shaneharter) on GitHub. Unfortunately, his library was abandoned years ago, 
-was written for PHP v5.3, had no namespacing, no package management or an auto-loader (ie: Composer). 
+from [Shane Harter](https://github.com/shaneharter) on GitHub. Unfortunately, his library was abandoned (or is on 
+indefinite hiatus), was written for PHP v5.3, had no namespacing, no package management or an auto-loader (ie: Composer). 
 
 I choose to create an entirely new library instead of forking and modifying his original library for educational 
 purposes. I also didn't agree with some of his methodologies. I do require some extra dependencies, but 
 [Composer](http://getcomposer.org/) makes this a trivial issue.
 
 ---
-_This library is in a fully working state. I've created a very complex daemon that has run for weeks w/o any memory 
+_This library is in a fully working state. I've created very complex daemons that have run for weeks w/o any memory 
  leaks or crashes. But this is still a **Work in Progress**!_
