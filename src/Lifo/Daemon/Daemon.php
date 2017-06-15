@@ -453,64 +453,6 @@ abstract class Daemon
     }
 
     /**
-     * Log runtime error and dispatch event.
-     *
-     * @param string|\Exception $err
-     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
-     */
-    public function error($err, $varargs = null)
-    {
-        if ($err instanceof \Exception) {
-            $msg = sprintf('Uncaught Daemon Exception: %s in file: %s on line: %s%sPlain Stack Trace:%s%s',
-                $err->getMessage(), $err->getFile(), $err->getLine(), PHP_EOL, PHP_EOL, $err->getTraceAsString());
-        } else {
-            $msg = vsprintf($err, array_slice(func_get_args(), 1));
-        }
-
-        $event = $this->dispatch(DaemonEvent::ON_ERROR, new ErrorEvent($this, $msg));
-        if (!$event->isPropagationStopped()) {
-            $this->log($msg);
-        }
-    }
-
-    /**
-     * Log fatal error and if possible restart the daemon. Current daemon process is halted after calling this method.
-     *
-     * @param string|\Exception $err
-     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
-     */
-    public function fatalError($err, $varargs = null)
-    {
-        if ($err instanceof CleanErrorException) {
-            // don't want stack trace for clean errors
-            $msg = 'Fatal Error: ' . $err->getMessage();
-        } else if ($err instanceof \Exception) {
-            $msg = sprintf('Fatal Error: %s in file: %s on line: %s%sPlain Stack Trace:%s%s',
-                $err->getMessage(), $err->getFile(), $err->getLine(), PHP_EOL, PHP_EOL, $err->getTraceAsString());
-        } else {
-            $msg = vsprintf($err, array_slice(func_get_args(), 1));
-        }
-
-        $this->error($msg);
-
-        if ($this->parent) {
-            $this->log(StringUtil::baseClassName($this) . " Shutdown");
-
-            // only restart if we were fully initialized and if we've been running longer than the restart threshold
-            if ($this->initialized
-                && $this->daemonize
-                && !$this->shutdown
-                && !($err instanceof CleanErrorException)
-                && $this->getRuntime() > $this->minRestartThreshold
-            ) {
-                $this->restart();
-            }
-        }
-
-        exit(1);
-    }
-
-    /**
      * One-time daemon initialization.
      * Called after plugins and signals are installed. Daemon will already be forked, if configured to do so.
      *
@@ -877,8 +819,8 @@ abstract class Daemon
      * listening on the {@link DaemonEvent::ON_LOG} event. If propagation of the event is stopped then the log message
      * will not be handled directly by this method.
      *
-     * @param string $msg
-     * @param mixed  $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
+     * @param mixed $msg     Message string, array or object to log
+     * @param mixed $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
      *
      */
     public function log($msg, $varargs = null)
@@ -886,9 +828,13 @@ abstract class Daemon
         // prevent potential infinite loop when recursively calling log()
         static $inside = false;
 
-        $args = array_slice(func_get_args(), 1);
-        if ($args) {
-            $msg = vsprintf($msg, $args);
+        if (is_scalar($msg)) {
+            $args = array_slice(func_get_args(), 1);
+            if ($args) {
+                $msg = vsprintf($msg, $args);
+            }
+        } else {
+            $msg = StringUtil::dump($msg, false);
         }
 
         $event = $this->dispatch(DaemonEvent::ON_LOG, new LogEvent($this, $msg));
@@ -915,6 +861,68 @@ abstract class Daemon
         }
 
         $this->output($msg);
+    }
+
+    /**
+     * Log runtime error and dispatch event.
+     *
+     * @param string|\Exception $err
+     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
+     */
+    public function error($err, $varargs = null)
+    {
+        if ($err instanceof \Exception) {
+            $msg = sprintf('Uncaught Daemon Exception: %s in file: %s on line: %s%sPlain Stack Trace:%s%s',
+                $err->getMessage(), $err->getFile(), $err->getLine(), PHP_EOL, PHP_EOL, $err->getTraceAsString());
+        } elseif (is_scalar($err)) {
+            $msg = vsprintf($err, array_slice(func_get_args(), 1));
+        } else {
+            $msg = $err;
+        }
+
+        $event = $this->dispatch(DaemonEvent::ON_ERROR, new ErrorEvent($this, $msg));
+        if (!$event->isPropagationStopped()) {
+            $this->log($msg);
+        }
+    }
+
+    /**
+     * Log fatal error and if possible restart the daemon. Current daemon process is halted after calling this method.
+     *
+     * @param string|\Exception $err
+     * @param mixed             $varargs Extra arguments (arg1, arg2, etc) to pass to {@link sprintf}
+     */
+    public function fatalError($err, $varargs = null)
+    {
+        if ($err instanceof CleanErrorException) {
+            // don't want stack trace for clean errors
+            $msg = 'Fatal Error: ' . $err->getMessage();
+        } else if ($err instanceof \Exception) {
+            $msg = sprintf('Fatal Error: %s in file: %s on line: %s%sPlain Stack Trace:%s%s',
+                $err->getMessage(), $err->getFile(), $err->getLine(), PHP_EOL, PHP_EOL, $err->getTraceAsString());
+        } elseif (is_scalar($err)) {
+            $msg = vsprintf($err, array_slice(func_get_args(), 1));
+        } else {
+            $msg = $err;
+        }
+
+        $this->error($msg);
+
+        if ($this->parent) {
+            $this->log(StringUtil::baseClassName($this) . " Shutdown");
+
+            // only restart if we were fully initialized and if we've been running longer than the restart threshold
+            if ($this->initialized
+                && $this->daemonize
+                && !$this->shutdown
+                && !($err instanceof CleanErrorException)
+                && $this->getRuntime() > $this->minRestartThreshold
+            ) {
+                $this->restart();
+            }
+        }
+
+        exit(1);
     }
 
     /**
@@ -1588,7 +1596,7 @@ abstract class Daemon
                 }
             };
         } else {
-            $callback = function() use ($task, $args) {
+            $callback = function () use ($task, $args) {
                 call_user_func_array($task, $args);
             };
         }

@@ -5,6 +5,9 @@ namespace Lifo\Daemon;
 
 use DateInterval;
 use DateTime;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
 abstract class StringUtil
 {
@@ -213,5 +216,30 @@ abstract class StringUtil
     public static function baseClassName($fqcn)
     {
         return basename(str_replace('\\', '/', is_object($fqcn) ? get_class($fqcn) : $fqcn));
+    }
+
+    /**
+     * Return a string representing the variable. Will use the Symfony VarDump, if available. Otherwise a simple
+     * JSON object will be returned.
+     *
+     * @param mixed $var   Variable to dump
+     * @param bool  $color If true, use ANSI color output (if VarDumper is used)
+     * @return string String representation of variable
+     */
+    public static function dump($var, $color = true)
+    {
+        if (class_exists('\Symfony\Component\VarDumper\VarDumper')) {
+            $dumper = 'cli' === PHP_SAPI ? new CliDumper() : new HtmlDumper();
+            $clone = new VarCloner();
+            $handle = fopen('php://memory', 'r+b');
+
+            $dumper->setColors($color);
+            $dumper->dump($clone->cloneVar($var), $handle);
+            $output = stream_get_contents($handle, -1, 0);
+            fclose($handle);
+            return $output;
+        }
+
+        return json_encode($var, JSON_PRETTY_PRINT);
     }
 }
