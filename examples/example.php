@@ -6,13 +6,20 @@
 
 declare(ticks = 1); // needed for the daemon signal handling
 
-if (!file_exists(__DIR__ . '/../../../autoload.php')) {
-    exampleHeader("Error: You must initialize your composer in the root of your application before running any examples: composer install", false);
-    exit(1);
-}
-
 /** @var \Composer\Autoload\ClassLoader $loader */
-$loader = require __DIR__ . '/../../../autoload.php';
+// if php-daemon is installed on its own (not included in another composer.json)
+$loader = @include __DIR__ . '/../vendor/autoload.php';
+if (!$loader) {
+    // if php-daemon is installed inside another composer.json
+    $loader = @include __DIR__ . '/../../../autoload.php';
+    if (!$loader) {
+        exampleHeader("Error: You must initialize your composer in the root of your application before running any examples: composer install", false);
+        exit(1);
+    }
+} else {
+    // must add the Lifo\Daemon prefix manually
+    $loader->add('Lifo\\Daemon', __DIR__ . '/../src');
+}
 
 if (empty($argv[1])) {
     listExamples();
