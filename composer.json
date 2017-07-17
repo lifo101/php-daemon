@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Lifo\\Daemon\\": "src/"
+            "Lifo\\Daemon\\": "src/Lifo/Daemon"
         }
     },
     "require": {
