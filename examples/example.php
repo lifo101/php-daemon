@@ -16,7 +16,6 @@ if (!$loader) {
         exampleHeader("Error: You must initialize your composer in the root of your application before running any examples: composer install", false);
         exit(1);
     }
-    var_dump($loader);
 }
 // must add the Lifo\Daemon prefix manually
 $loader->add('Lifo\\Daemon\\', __DIR__ . '/../src');
