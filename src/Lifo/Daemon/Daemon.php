@@ -875,7 +875,8 @@ abstract class Daemon
             $msg = sprintf('Uncaught Daemon Exception: %s in file: %s on line: %s%sPlain Stack Trace:%s%s',
                 $err->getMessage(), $err->getFile(), $err->getLine(), PHP_EOL, PHP_EOL, $err->getTraceAsString());
         } elseif (is_scalar($err)) {
-            $msg = vsprintf($err, array_slice(func_get_args(), 1));
+            $args = array_slice(func_get_args(), 1);
+            $msg = $args ? vsprintf($err, $args) : $err;
         } else {
             $msg = $err;
         }
