@@ -1774,6 +1774,7 @@ abstract class Daemon
         if ($this->shutdown) {
             return;
         }
+        pcntl_signal_dispatch();
 
         if ($this->isIdle($start)) {
             $this->dispatch(DaemonEvent::ON_IDLE);
