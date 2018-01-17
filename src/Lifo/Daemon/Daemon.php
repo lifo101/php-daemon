@@ -1962,19 +1962,19 @@ abstract class Daemon
      *
      * @return array
      */
-    private function getSignals()
+    protected function getSignals()
     {
         $signals = [
             // primary signals handled by the daemon
             'SIGTERM', 'SIGINT', 'SIGUSR1', 'SIGHUP', 'SIGCHLD',
 
             // other signals that can be caught by setting an event handler
-            'SIGUSR2',   'SIGQUIT',   'SIGILL',    'SIGTRAP', 'SIGABRT', 'SIGIOT',
-            'SIGBUS',    'SIGFPE',    'SIGSEGV',   'SIGPIPE', 'SIGALRM', 'SIGCONT',
-            'SIGTSTP',   'SIGTTIN',   'SIGTTOU',   'SIGURG',  'SIGXCPU', 'SIGXFSZ',
-            'SIGVTALRM', 'SIGPROF',   'SIGWINCH',  'SIGIO',   'SIGPOLL', 'SIGSYS',
-            'SIGBABY',   'SIGPWR',    'SIGEMT',    'SIGINFO', 'SIGPWR',  'SIGLOST',
-            'SIGWINCH',  'SIGSTKFLT', 'SIGUNUSED', 'SIGCLD',  'SIGLWP',
+            'SIGUSR2', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT', 'SIGIOT',
+            'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGPIPE', 'SIGALRM', 'SIGCONT',
+            'SIGTSTP', 'SIGTTIN', 'SIGTTOU', 'SIGURG', 'SIGXCPU', 'SIGXFSZ',
+            'SIGVTALRM', 'SIGPROF', 'SIGWINCH', 'SIGIO', 'SIGPOLL', 'SIGSYS',
+            'SIGBABY', 'SIGPWR', 'SIGEMT', 'SIGINFO', 'SIGPWR', 'SIGLOST',
+            'SIGWINCH', 'SIGSTKFLT', 'SIGUNUSED', 'SIGCLD', 'SIGLWP',
         ];
 
         $availableSignals = [];
