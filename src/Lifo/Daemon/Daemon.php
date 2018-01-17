@@ -954,7 +954,7 @@ abstract class Daemon
      */
     protected function getLogPrefix()
     {
-        $time = array_pad(explode('.', microtime(true)), 2, 0);
+        $time = array_pad(explode(localeconv()['decimal_point'], microtime(true)), 2, 0);
         // timestamp + microseconds
 //        return sprintf("%s%04d: %d: ", date('Y-m-d H:i:s.', $time[0]), $time[1], $this->pid);
         return sprintf("%s%04d: %-6d %6d: ", date('Y-m-d H:i:s.', $time[0]), $time[1], $this->parentPid, getmypid());
