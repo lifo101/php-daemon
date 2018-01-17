@@ -1957,17 +1957,33 @@ abstract class Daemon
         return $phpPath;
     }
 
+    /**
+     * Return available signals (IPC)
+     *
+     * @return array
+     */
     private function getSignals()
     {
-        return [
+        $signals = [
             // primary signals handled by the daemon
-            SIGTERM, SIGINT, SIGUSR1, SIGHUP, SIGCHLD,
+            'SIGTERM', 'SIGINT', 'SIGUSR1', 'SIGHUP', 'SIGCHLD',
 
             // other signals that can be caught by setting an event handler
-            SIGUSR2, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGIOT, SIGBUS, SIGFPE, SIGSEGV, SIGPIPE, SIGALRM,
-            SIGCONT, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF,
-            SIGWINCH, SIGIO, SIGPOLL, SIGSYS, SIGBABY, SIGPWR
+            'SIGUSR2',   'SIGQUIT',   'SIGILL',    'SIGTRAP', 'SIGABRT', 'SIGIOT',
+            'SIGBUS',    'SIGFPE',    'SIGSEGV',   'SIGPIPE', 'SIGALRM', 'SIGCONT',
+            'SIGTSTP',   'SIGTTIN',   'SIGTTOU',   'SIGURG',  'SIGXCPU', 'SIGXFSZ',
+            'SIGVTALRM', 'SIGPROF',   'SIGWINCH',  'SIGIO',   'SIGPOLL', 'SIGSYS',
+            'SIGBABY',   'SIGPWR',    'SIGEMT',    'SIGINFO', 'SIGPWR',  'SIGLOST',
+            'SIGWINCH',  'SIGSTKFLT', 'SIGUNUSED', 'SIGCLD',  'SIGLWP',
         ];
+
+        $availableSignals = [];
+        foreach ($signals as $signal) {
+            if (defined($signal)) {
+                $availableSignals[$signal] = constant($signal);
+            }
+        }
+        return $availableSignals;
     }
 
     public function setupSignals($handler = null)
