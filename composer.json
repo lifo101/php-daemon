@@ -17,8 +17,8 @@
     "require": {
         "php": ">=5.4.4",
         "ext-pcntl": "*",
-        "symfony/event-dispatcher": "^2.8|^3.0",
-        "symfony/process": "^2.8|^3.0"
+        "symfony/event-dispatcher": ">=^2.8",
+        "symfony/process": ">=^2.8"
     },
     "suggest": {
         "symfony/var-dumper": "For better debug dump output",
