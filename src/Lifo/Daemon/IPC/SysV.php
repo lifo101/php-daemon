@@ -52,6 +52,14 @@ class SysV implements IPCInterface
         $this->setupIPC();
     }
 
+    private function check($var)
+    {
+        if(PHP_MAJOR_VERSION >= 8) {
+            return is_object($var);
+        }
+        return is_resource($var);
+    }
+
     private function purgeSEM()
     {
         if ($this->sem) {
@@ -62,7 +70,7 @@ class SysV implements IPCInterface
 
     private function purgeSHM()
     {
-        if (!is_resource($this->shm)) {
+        if (!$this->check($this->shm)) {
             $this->setupIPC();
         }
 
@@ -75,7 +83,7 @@ class SysV implements IPCInterface
 
     private function purgeQueue()
     {
-        if (!is_resource($this->queue)) {
+        if (!$this->check($this->queue)) {
             $this->setupIPC();
         }
 
@@ -93,12 +101,12 @@ class SysV implements IPCInterface
     {
         $this->sem = sem_get($this->mediator->getGuid());
         $this->shm = shm_attach($this->mediator->getGuid(), $this->size, 0666);
-        if (!is_resource($this->shm)) {
+        if (!$this->check($this->shm)) {
             throw new \Exception(sprintf("Could not attach to Shared Memory Block 0x%08x", $this->mediator->getGuid()));
         }
 
         $this->queue = msg_get_queue($this->mediator->getGuid(), 0666);
-        if (!is_resource($this->queue)) {
+        if (!$this->check($this->queue)) {
             throw new \Exception(sprintf("Could not attach to message queue 0x%08x", $this->mediator->getGuid()));
         }
     }
@@ -381,7 +389,7 @@ class SysV implements IPCInterface
      */
     private function testIpc()
     {
-        if (!is_resource($this->shm)) {
+        if (!$this->check($this->shm)) {
             return false;
         }
 
