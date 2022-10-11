@@ -14,7 +14,7 @@ class MemoryPlugin extends AbstractPlugin
 {
     use LogTrait;
 
-    protected function getDefaults()
+    protected function getDefaults(): array
     {
         return [
             // how often to dump stats
@@ -22,7 +22,7 @@ class MemoryPlugin extends AbstractPlugin
         ];
     }
 
-    public function setup($options = [])
+    public function setup(array $options = []): void
     {
         static $last = 0;
         // not the proper place to put this, but it'll do for this example

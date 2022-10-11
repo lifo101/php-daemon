@@ -10,22 +10,21 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "Lifo\\Daemon\\": "src/"
+        "psr-4": {
+            "Lifo\\Daemon\\": "src"
         }
     },
     "require": {
-        "php": ">=5.4.4",
+        "php": "^7.4",
         "ext-pcntl": "*",
-        "symfony/event-dispatcher": ">=2.8",
-        "symfony/process": ">=2.8"
+        "ext-sysvmsg": "*",
+        "ext-sysvsem": "*",
+        "ext-sysvshm": "*",
+        "symfony/event-dispatcher": "^4.4||^5.0||^6.0",
+        "symfony/process": "^4.4||^5.0||^6.0"
     },
     "suggest": {
         "symfony/var-dumper": "For better debug dump output",
         "symfony/options-resolver": "For better plugin options support"
-    },
-    "require-dev": {
-    },
-    "scripts": {
     }
 }
