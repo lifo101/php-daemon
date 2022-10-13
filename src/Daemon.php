@@ -94,7 +94,7 @@ abstract class Daemon
      *
      * @var callable|resource|string|null
      */
-    private $output = STDERR;
+    private $output = null;
 
     /**
      * Main event loop frequency in fractional seconds.
@@ -293,6 +293,7 @@ abstract class Daemon
         $this->event = new DaemonEvent();
         $this->pid = getmypid() ?: null; // don't want to call event handler with setPid()
         $this->parentPid = $this->pid;
+        $this->setOutput(null);
     }
 
     public function isDumpOnSignal(): bool
@@ -2101,15 +2102,15 @@ abstract class Daemon
     /**
      * Sets the output destination for console output. Setting to null will default back to STDERR.
      *
-     * @param callable|resource|string $output A callable, an opened stream or an output path
+     * @param callable|resource|string|null $output A callable, an opened stream or an output path
      *
      * @return $this
      */
     public function setOutput($output): self
     {
         switch (true) {
-            case empty($output):
-                $this->output = STDERR;
+            case $output === null:
+                $this->output = fopen('php://stderr', 'w');
                 break;
             case is_callable($output):
             case get_resource_type($output) == 'stream':

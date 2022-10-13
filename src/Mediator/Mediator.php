@@ -22,6 +22,7 @@ use Lifo\Daemon\Task\TaskInterface;
 use Lifo\Daemon\Worker\WorkerInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use Throwable;
 
 /**
  *
@@ -135,10 +136,9 @@ class Mediator implements TaskInterface
     /**
      * Was the object setup?
      *
-     * @internal
      * @var bool
      */
-    private $initialized;
+    private bool $initialized = false;
 
     /**
      * The subject being mediated.
@@ -166,53 +166,41 @@ class Mediator implements TaskInterface
      * process will be forked on an as-needed basis.
      *
      * Auto restarts will not occur if the subject's callback takes a long time.
-     *
-     * @var bool
      */
     private bool $autoRestart = false;
 
     /**
      * Maximum calls this instance will process before exiting. {@link $autoRestart} must be true.
      * A small amount of entropy is added to reduce all children restarting at the same time.
-     *
-     * @var int
      */
     private int $maxCalls = 0;
 
     /**
      * Maximum seconds this instance will run before exiting. {@link $autoRestart} must be true.
      * A small amount of entropy is added to reduce all children restarting at the same time.
-     *
-     * @var int
      */
     private int $maxRuntime = 0;
 
     /**
      * Minimum seconds this instance will run before exiting. {@link $autoRestart} must be true.
-     *
-     * @var int
      */
     private int $minRuntime = 0;
 
     /**
      * Maximum worker processes allowed
      * A small amount of entropy is added to reduce all children restarting at the same time.
-     *
-     * @var int
      */
     private int $maxProcesses = 1;
 
     /**
      * Allow the Mediator to wakeup the daemon?
-     *
-     * @var bool
      */
     private bool $allowWakeup = false;
 
     /**
      * Event listeners
      *
-     * @var array
+     * @var callable[]|array
      */
     private array $events = [];
 
@@ -238,14 +226,12 @@ class Mediator implements TaskInterface
     /**
      * A list of recent calls made for stats purposes
      *
-     * @var array[]
+     * @var array[][]
      */
     private array $recent = [];
 
     /**
      * How many calls have been made
-     *
-     * @var int
      */
     private int $callCount = 0;
 
@@ -253,6 +239,7 @@ class Mediator implements TaskInterface
      * @var int[][]
      */
     private array $errorCounts = [];
+
     /**
      * @var int[]
      */
@@ -1178,7 +1165,7 @@ class Mediator implements TaskInterface
                 $result = null;
                 try {
                     $result = $this->callSubject($call);
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                     $this->error("callSubject Exception: " . $e->getMessage());
                     $call->incErrors();
                 }

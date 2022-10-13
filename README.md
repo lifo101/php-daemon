@@ -19,7 +19,7 @@ While this library does everything it can to allow you to create a rock solid da
 user-land code to keep things stable. 
 
 ### Requirements
-- PHP 5.4.4+
+- PHP 7.4+
 - A POSIX compatible operating system (Linux, OSX, BSD)
 - PHP [POSIX](http://php.net/posix) and [PCNTL](http://php.net/pcntl) Extensions
 
@@ -78,5 +78,5 @@ purposes. I also didn't agree with some of his methodologies. I do require some 
 [Composer](http://getcomposer.org/) makes this a trivial issue.
 
 ---
-_This library is in a fully working state. I've created very complex daemons that have run for weeks w/o any memory 
- leaks or crashes. But this is still a **Work in Progress**!_
+_This library is in a fully working state. I've created very complex daemons that have run for months w/o any memory 
+ leaks or crashes. More could be done...
