@@ -22,11 +22,11 @@ class SysV implements IPCInterface
     private int      $size;
     private Mediator $mediator;
 
-    /** @var resource|false */
+    /** @var resource|\SysvSemaphore|false */
     private $sem = false;
-    /** @var resource|false */
+    /** @var resource|\SysvSharedMemory|false */
     private $shm = false;
-    /** @var resource|false */
+    /** @var resource|\SysvMessageQueue|false */
     private $queue = false;
 
     public function __construct($size = null)
@@ -50,25 +50,28 @@ class SysV implements IPCInterface
         $this->setupIPC();
     }
 
-    private function check($var): bool
+    /**
+     * Check if the variable given is a resource or PHP8 'resource' class
+     * @param $var
+     *
+     * @return bool
+     */
+    private function isResource($var): bool
     {
-        if (PHP_MAJOR_VERSION >= 8) {
-            return is_object($var);
-        }
-        return is_resource($var);
+        return PHP_MAJOR_VERSION < 8 ? is_resource($var) : is_object($var);
     }
 
     private function purgeSEM()
     {
         if ($this->sem) {
-            sem_remove($this->sem);
+            @sem_remove($this->sem);
         }
         $this->sem = null;
     }
 
     private function purgeSHM()
     {
-        if (!$this->check($this->shm)) {
+        if (!$this->isResource($this->shm)) {
             $this->setupIPC();
         }
 
@@ -81,7 +84,7 @@ class SysV implements IPCInterface
 
     private function purgeQueue()
     {
-        if (!$this->check($this->queue)) {
+        if (!$this->isResource($this->queue)) {
             $this->setupIPC();
         }
 
@@ -99,12 +102,12 @@ class SysV implements IPCInterface
     {
         $this->sem = sem_get($this->mediator->getGuid());
         $this->shm = shm_attach($this->mediator->getGuid(), $this->size);
-        if (!$this->check($this->shm)) {
+        if (!$this->isResource($this->shm)) {
             throw new Exception(sprintf("Could not attach to Shared Memory Block 0x%08x", $this->mediator->getGuid()));
         }
 
         $this->queue = msg_get_queue($this->mediator->getGuid());
-        if (!$this->check($this->queue)) {
+        if (!$this->isResource($this->queue)) {
             throw new Exception(sprintf("Could not attach to message queue 0x%08x", $this->mediator->getGuid()));
         }
     }
@@ -388,7 +391,7 @@ class SysV implements IPCInterface
      */
     private function testIpc(): bool
     {
-        if (!$this->check($this->shm)) {
+        if (!$this->isResource($this->shm)) {
             return false;
         }
 
