@@ -1696,7 +1696,7 @@ abstract class Daemon
                 // any other signals sent will break the sleep and the loop will immediately execute again.
                 $s1 = microtime(true);
                 pcntl_sigprocmask(SIG_BLOCK, [SIGCHLD]);
-                usleep($delta * 1000000);
+                usleep((int)($delta * 1000000)); # (int) cast to avoid "Deprecated: Implicit conversion from float messages"
                 pcntl_sigprocmask(SIG_UNBLOCK, [SIGCHLD]);
 
                 // if elapsed is less than delta, then the sleep was interrupted by a signal (eg: SIGINT, SIGALRM)

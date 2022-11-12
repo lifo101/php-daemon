@@ -135,14 +135,14 @@ abstract class StringUtil
     /**
      * Shortcut for {@link elapsedShort}($seconds . ' sec')
      *
-     * @param int  $seconds
-     * @param bool $noSeconds Strip off seconds; unless the total time is < 60 seconds
+     * @param float|int $seconds
+     * @param bool      $noSeconds Strip off seconds; unless the total time is < 60 seconds
      *
      * @return string
      */
-    public static function elapsedFromSeconds(int $seconds, bool $noSeconds = true): string
+    public static function elapsedFromSeconds($seconds, bool $noSeconds = true): string
     {
-        $time = self::elapsedShort($seconds . ' sec');
+        $time = self::elapsedShort((int)$seconds . ' sec');
         if ($noSeconds && $seconds >= 60) {
             // not exactly the way to do this, but works for now.
             $str = preg_replace('/\d+\s*s(?:econds?)?$/', '', $time);

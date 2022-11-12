@@ -142,7 +142,7 @@ class FileLock extends AbstractLock
         if (!$pid || $pid != $this->pid || !$lastTime || microtime(true) > $lastTime + $this['pid_refresh_frequency']) {
             if (@file_exists($this['file'])) {
                 // only load up to 8 bytes to avoid malicious files
-                $pid = @file_get_contents($this['file'], null, null, 0, 8);
+                $pid = @file_get_contents($this['file'], false, null, 0, 8);
                 if ($pid) {
                     $pid = (int)trim($pid);
                     $lastTime = microtime(true);

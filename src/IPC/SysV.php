@@ -408,9 +408,9 @@ class SysV implements IPCInterface
      * @param int $delay
      * @param int $try
      *
-     * @return float
+     * @return int
      */
-    private function getDelay(int $delay, int $try): float
+    private function getDelay(int $delay, int $try): int
     {
         return $delay * pow(2, min(max($try, 1), 8)) - $delay;
     }

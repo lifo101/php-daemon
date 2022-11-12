@@ -4,13 +4,12 @@ namespace Lifo\Daemon\Mediator;
 
 use Exception;
 use Lifo\Daemon\Promise;
-use Serializable;
 
 /**
  * Represents a method call to a mediated worker process. A call is serialized into a message buffer and passed back
  * and forth between a parent and child process.
  */
-class Call implements Serializable
+class Call
 {
     const UNCALLED    = 0;
     const CALLED      = 1;
@@ -138,9 +137,9 @@ class Call implements Serializable
         return self::STATUS_TEXT[$status] ?? 'unknown';
     }
 
-    public function serialize(): ?string
+    public function __serialize(): array
     {
-        $data = [
+        return [
             'id'     => $this->id,
             'pid'    => $this->pid,
             'status' => $this->status,
@@ -150,12 +149,10 @@ class Call implements Serializable
             'result' => $this->result,
             // do not include promise
         ];
-        return serialize($data);
     }
 
-    public function unserialize($data): void
+    public function __unserialize(array $data): void
     {
-        $data = unserialize($data);
         foreach ($data as $var => $value) {
             if (property_exists($this, $var)) {
                 $this->$var = $value;
