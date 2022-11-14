@@ -19,7 +19,7 @@ While this library does everything it can to allow you to create a rock solid da
 user-land code to keep things stable. 
 
 ### Requirements
-- PHP 7.4+
+- PHP ^7.4 || ^8.0
 - A POSIX compatible operating system (Linux, OSX, BSD)
 - PHP [POSIX](http://php.net/posix) and [PCNTL](http://php.net/pcntl) Extensions
 
