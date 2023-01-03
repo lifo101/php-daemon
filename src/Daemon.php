@@ -573,7 +573,7 @@ abstract class Daemon
     /**
      * Return the current event dispatcher. If none is defined a new object is created first.
      */
-    public function getEventDispatcher(): EventDispatcher
+    public function getEventDispatcher(): EventDispatcherInterface
     {
         return $this->dispatcher ??= new EventDispatcher();
     }
