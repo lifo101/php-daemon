@@ -104,8 +104,6 @@ class DaemonEvent extends Event
      */
     const ON_REAPED = 'process.reaped';
 
-    protected ?Daemon $daemon;
-
     private bool $propagationStopped = false;
 
     public function __construct()
@@ -125,10 +123,5 @@ class DaemonEvent extends Event
     public function startPropagation()
     {
         $this->propagationStopped = false;
-    }
-
-    public function getDaemon(): ?Daemon
-    {
-        return $this->daemon;
     }
 }

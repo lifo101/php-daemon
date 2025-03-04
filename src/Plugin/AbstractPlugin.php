@@ -25,7 +25,7 @@ abstract class AbstractPlugin implements PluginInterface, ArrayAccess
         $this->verify();
 
         Daemon::getInstance()->on(DaemonEvent::ON_STATS, function (StatsEvent $e) {
-            $stats = $this->onStats($e->getStats(), $e->getDaemon()->getPluginAlias($this) ?: get_class($this));
+            $stats = $this->onStats($e->getStats(), Daemon::getInstance()->getPluginAlias($this) ?: get_class($this));
             if ($stats) {
                 $e->setStats($stats);
             }

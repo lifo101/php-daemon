@@ -931,18 +931,18 @@ abstract class Daemon
     public function stats(): array
     {
         $stats = [
-            'pid'      => $this->pid,
-            'user'     => [
+            'pid'             => $this->pid,
+            'user'            => [
                 'uid'   => posix_geteuid(),
                 'gid'   => posix_getegid(),
                 'name'  => posix_getpwuid(posix_geteuid())['name'],
                 'group' => posix_getgrgid(posix_getegid())['name'],
-//                'groups' => array_map(function ($id) { return posix_getgrgid($id)['name']; }, posix_getgroups()),
+                //                'groups' => array_map(function ($id) { return posix_getgrgid($id)['name']; }, posix_getgroups()),
             ],
-            'parent'   => $this->parent,
-            'shutdown' => $this->shutdown,
-            'logFile'  => $this->logFile,
-            'memory'   => [
+            'parent'          => $this->parent,
+            'shutdown'        => $this->shutdown,
+            'logFile'         => $this->logFile,
+            'memory'          => [
                 'initial'      => $this->stats['initial_memory']['usage'],
                 'initial_kb'   => StringUtil::kbytes($this->stats['initial_memory']['usage']),
                 'current'      => memory_get_usage(),
@@ -957,15 +957,16 @@ abstract class Daemon
                 'peak_real_kb' => StringUtil::kbytes(memory_get_peak_usage(true)),
                 'max'          => ini_get('memory_limit'),
             ],
-            'load'     => sys_getloadavg(),
-            'times'    => posix_times(),
-            'runtime'  => $this->getRuntime(),
-            'loop'     => [
+            'load'            => sys_getloadavg(),
+            'times'           => posix_times(),
+            'runtime'         => $this->getRuntime(),
+            'runtime_elapsed' => StringUtil::elapsedFromSeconds($this->getRuntime()) ?: '0s',
+            'loop'            => [
                 'start'      => date('Y-m-d H:i:s', floor($this->loopStart)),
                 'interval'   => $this->loopInterval,
                 'iterations' => $this->loopIterations,
             ],
-            'events'   => $this->dispatched,
+            'events'          => $this->dispatched,
         ];
 
         /** @var StatsEvent $e */

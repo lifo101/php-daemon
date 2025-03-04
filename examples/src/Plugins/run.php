@@ -1,7 +1,7 @@
 <?php
 
 $META = [
-    'description' => "Shows how to use plugins within a Daemon."
+    'description' => "Shows how to use plugins and collect stats within a Daemon."
 ];
 
 return function () {
