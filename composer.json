@@ -20,8 +20,8 @@
         "ext-sysvmsg": "*",
         "ext-sysvsem": "*",
         "ext-sysvshm": "*",
-        "symfony/event-dispatcher": "^4.4||^5.0||^6.0",
-        "symfony/process": "^4.4||^5.0||^6.0"
+        "symfony/event-dispatcher": "^5.0||^6.0||^7.0",
+        "symfony/process": "^5.0||^6.0||^7.0"
     },
     "suggest": {
         "symfony/var-dumper": "For better debug dump output",
